@@ -643,6 +643,8 @@ static bool test_locate_cards_by_atr_a(SCARDCONTEXT context)
   SCARD_READERSTATEA rgReaderStates[6] = {};
   SCARD_ATRMASK rgAtrMasks[6] = {};
 
+  rgAtrMasks[3].cbAtr=11;
+  rgReaderStates[1].szReader = "foobar";
   auto rc = SCardLocateCardsByATRA(context, rgAtrMasks, ARRAYSIZE(rgAtrMasks),
                                    rgReaderStates, ARRAYSIZE(rgReaderStates));
   if (rc != SCARD_S_SUCCESS) {
@@ -659,12 +661,13 @@ static bool test_locate_cards_by_atr_w(SCARDCONTEXT context)
   SCARD_READERSTATEW rgReaderStates[6] = {};
   SCARD_ATRMASK rgAtrMasks[6] = {};
 
+  rgAtrMasks[3].cbAtr=11;
+  rgReaderStates[1].szReader = L"foobar";
   auto rc = SCardLocateCardsByATRW(context, rgAtrMasks, ARRAYSIZE(rgAtrMasks),
                                    rgReaderStates, ARRAYSIZE(rgReaderStates));
   if (rc != SCARD_S_SUCCESS) {
     std::cerr << "SCardLocateCardsByATRW failed with " << err2str(rc)
               << std::endl;
-    return false;
   }
 
   return true;
@@ -919,7 +922,8 @@ static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
         SCardFreeMemory(context, attr);
 
         for (DWORD x=0; x<256; x++) {
-            attrlen = x;
+            BYTE attr[1024] = {};
+            DWORD attrlen = x;
             auto rc =
                 SCardGetAttrib(handle, id, attr, &attrlen);
             if (rc != SCARD_S_SUCCESS)
