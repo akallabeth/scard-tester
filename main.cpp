@@ -557,6 +557,18 @@ static bool test_reader_icon_a(SCARDCONTEXT context)
 		return false;
 	}
 
+    for (DWORD x=0; x<256; x++)
+    {
+        LPBYTE pbIcon = nullptr;
+        DWORD cbIcon = x;
+        auto rc = SCardGetReaderIconA(context, name, pbIcon, &cbIcon);
+        if (rc != SCARD_S_SUCCESS)
+        {
+            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc) << std::endl;
+            return false;
+        }
+    }
+
 	return true;
 }
 
@@ -574,6 +586,17 @@ static bool test_reader_icon_w(SCARDCONTEXT context)
 		return false;
 	}
 
+    for (DWORD x=0; x<256; x++)
+    {
+        LPBYTE pbIcon = nullptr;
+        DWORD cbIcon = x;
+        auto rc = SCardGetReaderIconW(context, name, pbIcon, &cbIcon);
+        if (rc != SCARD_S_SUCCESS)
+        {
+            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc) << std::endl;
+            return false;
+        }
+    }
 	return true;
 }
 
@@ -641,7 +664,6 @@ static bool test_locate_cards_by_atr_w(SCARDCONTEXT context)
 
 static bool test_devicetype_id_a(SCARDCONTEXT context)
 {
-	BYTE data[32] = {};
 	LPSTR name = "testdata";
 	DWORD type;
 
@@ -657,7 +679,6 @@ static bool test_devicetype_id_a(SCARDCONTEXT context)
 
 static bool test_devicetype_id_w(SCARDCONTEXT context)
 {
-	BYTE data[32] = {};
 	LPWSTR name = L"testdata";
 	DWORD type;
 
