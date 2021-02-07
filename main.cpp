@@ -874,6 +874,7 @@ static bool test_status_w(SCARDCONTEXT context, SCARDHANDLE handle)
     return true;
 }
 
+
 static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 {
     for (auto id : {SCARD_ATTR_ATR_STRING, SCARD_ATTR_VENDOR_NAME, SCARD_ATTR_DEVICE_FRIENDLY_NAME_A, SCARD_ATTR_DEVICE_FRIENDLY_NAME_W}) {
@@ -887,13 +888,23 @@ static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 
         std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
         SCardFreeMemory(context, attr);
+
+        for (DWORD x=0; x<256; x++) {
+            attrlen = x;
+            auto rc =
+                SCardGetAttrib(handle, id, attr, &attrlen);
+            if (rc != SCARD_S_SUCCESS)
+                std::cerr << "SCardGetAttrib failed with " << err2str(rc) << std::endl;
+
+            std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
+        }
     }
-	return true;
+    return true;
 }
+
 
 static bool test_set_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 {
-	DWORD attrlen = SCARD_AUTOALLOCATE;
 	BYTE attr[] = "0123456789";
 
 	auto rc = SCardSetAttrib(handle, SCARD_ATTR_SUPRESS_T1_IFS_REQUEST, attr, ARRAYSIZE(attr));
@@ -902,8 +913,7 @@ static bool test_set_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 		std::cerr << "SCardSetAttrib failed with " << err2str(rc) << std::endl;
 		return false;
 	}
-	std::cout << "SCardSetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
-	SCardFreeMemory(context, attr);
+    std::cout << "SCardSetAttrib: " << (char*)attr << std::endl;
 
 	return true;
 }
