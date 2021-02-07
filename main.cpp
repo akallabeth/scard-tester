@@ -179,19 +179,34 @@ static std::wstring err2wstr(LONG code)
 	return converter.from_bytes(str);
 }
 
-#if 0
-static bool test_listreadergroups(SCARDCONTEXT hContext) {
-    auto rc = SCardListReaderGroupsA(hContext, &groups, &foobar);
-    rc = SCardListReaderGroupsW(hContext, &groups, &foobar);
-}
-#endif
-
 static bool test_valid(SCARDCONTEXT context)
 {
 	auto rc = SCardIsValidContext(context);
 	if (rc)
 		std::cerr << "SCardIsValidContext failed with " << err2str(rc) << std::endl;
 	return true;
+}
+
+static void print_list_readers_a(LONG rc, LPCSTR cur, LPCSTR mszReaders, DWORD chReaders) {
+    std::string c = cur? cur : "nullptr";
+    if (rc != SCARD_S_SUCCESS)
+    {
+        std::cerr << "SCardListReadersA [" << c << "] failed with " << err2str(rc)
+                  << std::endl;
+    }
+    else
+    {
+        auto start = mszReaders;
+        auto end = &mszReaders[chReaders];
+
+        std::cout << "SCardListReadersA [" << c << "] " << chReaders << " [";
+        while (start < end)
+        {
+            std::cout << start << ", ";
+            start += strnlen(start, chReaders) + 2;
+        }
+        std::cout << "]" << std::endl;
+    }
 }
 
 static bool test_list_readers_a(SCARDCONTEXT context)
@@ -201,32 +216,39 @@ static bool test_list_readers_a(SCARDCONTEXT context)
 		LPSTR mszReaders = nullptr;
 		DWORD chReaders = SCARD_AUTOALLOCATE;
 		auto rc = SCardListReadersA(context, cur, reinterpret_cast<LPSTR>(&mszReaders), &chReaders);
-		if (!cur)
-		{
-			cur = "NULL";
-		}
-		if (rc != SCARD_S_SUCCESS)
-		{
-			std::cerr << "SCardListReadersA [" << cur << "] failed with " << err2str(rc)
-			          << std::endl;
-		}
-		else
-		{
-			auto start = mszReaders;
-			auto end = &mszReaders[chReaders];
-
-			std::cout << "SCardListReadersA [" << cur << "] " << chReaders << " [";
-			while (start < end)
-			{
-				std::cout << start << ", ";
-				start += strnlen(start, chReaders) + 2;
-			}
-			std::cout << "]" << std::endl;
-		}
+        print_list_readers_a(rc, cur, mszReaders, chReaders);
 		SCardFreeMemory(context, mszReaders);
+        for (DWORD x=0; x<256; x+=13) {
+            CHAR mszReaders[1024] = {};
+            DWORD chReaders = x;
+            auto rc = SCardListReadersA(context, cur, mszReaders, &chReaders);
+            print_list_readers_a(rc, cur, mszReaders, chReaders);
+        }
 	}
 
 	return true;
+}
+
+static void print_list_readers_w(LONG rc, LPCWSTR cur, LPCWSTR mszReaders, DWORD chReaders) {
+    std::wstring c = cur? cur : L"nullptr";
+    if (rc != SCARD_S_SUCCESS)
+    {
+        std::wcerr << L"SCardListReadersW [" << c;
+        std::cerr << "] failed with " << err2str(rc) << std::endl;
+    }
+    else
+    {
+        auto start = mszReaders;
+        auto end = &mszReaders[chReaders];
+
+        std::wcout << L"SCardListReadersW [" << c << L"] " << chReaders << L" [";
+        while (start < end)
+        {
+            std::wcout << start << L", ";
+            start += wcsnlen(start, chReaders) + 2;
+        }
+        std::wcout << L"]" << std::endl;
+    }
 }
 
 static bool test_list_readers_w(SCARDCONTEXT context)
@@ -237,29 +259,15 @@ static bool test_list_readers_w(SCARDCONTEXT context)
 		DWORD chReaders = SCARD_AUTOALLOCATE;
 		auto rc =
 		    SCardListReadersW(context, cur, reinterpret_cast<LPWSTR>(&mszReaders), &chReaders);
-		if (!cur)
-		{
-			cur = L"NULL";
-		}
-		if (rc != SCARD_S_SUCCESS)
-		{
-			std::wcerr << L"SCardListReadersW [" << cur << L"] failed with " << err2wstr(rc)
-			           << std::endl;
-		}
-		else
-		{
-			auto start = mszReaders;
-			auto end = &mszReaders[chReaders];
-
-			std::wcout << L"SCardListReadersW [" << cur << L"] " << chReaders << L" [";
-			while (start < end)
-			{
-				std::wcout << start << L", ";
-				start += wcsnlen(start, chReaders) + 2;
-			}
-			std::wcout << L"]" << std::endl;
-		}
+        print_list_readers_w(rc, cur, mszReaders, chReaders);
 		SCardFreeMemory(context, mszReaders);
+        for (DWORD x=0; x<246; x+=11) {
+            WCHAR mszReaders[1024] ={};
+            DWORD chReaders = x;
+            auto rc =
+                SCardListReadersW(context, cur, reinterpret_cast<LPWSTR>(&mszReaders), &chReaders);
+            print_list_readers_w(rc, cur, mszReaders, chReaders);
+        }
 	}
 
 	return true;
