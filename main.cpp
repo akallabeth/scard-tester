@@ -187,26 +187,23 @@ static bool test_valid(SCARDCONTEXT context)
 	return true;
 }
 
-static void print_list_readers_a(LONG rc, LPCSTR cur, LPCSTR mszReaders, DWORD chReaders) {
-    std::string c = cur? cur : "nullptr";
-    if (rc != SCARD_S_SUCCESS)
-    {
-        std::cerr << "SCardListReadersA [" << c << "] failed with " << err2str(rc)
-                  << std::endl;
-    }
-    else
-    {
-        auto start = mszReaders;
-        auto end = &mszReaders[chReaders];
+static void print_list_readers_a(LONG rc, LPCSTR cur, LPCSTR mszReaders,
+                                 DWORD chReaders) {
+  std::string c = cur ? cur : "nullptr";
+  if (rc != SCARD_S_SUCCESS) {
+    std::cerr << "SCardListReadersA [" << c << "] failed with " << err2str(rc)
+              << std::endl;
+  } else {
+    auto start = mszReaders;
+    auto end = &mszReaders[chReaders];
 
-        std::cout << "SCardListReadersA [" << c << "] " << chReaders << " [";
-        while (start < end)
-        {
-            std::cout << start << ", ";
-            start += strnlen(start, chReaders) + 2;
-        }
-        std::cout << "]" << std::endl;
+    std::cout << "SCardListReadersA [" << c << "] " << chReaders << " [";
+    while (start < end) {
+      std::cout << start << ", ";
+      start += strnlen(start, chReaders) + 2;
     }
+    std::cout << "]" << std::endl;
+  }
 }
 
 static bool test_list_readers_a(SCARDCONTEXT context)
@@ -216,39 +213,37 @@ static bool test_list_readers_a(SCARDCONTEXT context)
 		LPSTR mszReaders = nullptr;
 		DWORD chReaders = SCARD_AUTOALLOCATE;
 		auto rc = SCardListReadersA(context, cur, reinterpret_cast<LPSTR>(&mszReaders), &chReaders);
-        print_list_readers_a(rc, cur, mszReaders, chReaders);
-		SCardFreeMemory(context, mszReaders);
-        for (DWORD x=0; x<256; x+=13) {
-            CHAR mszReaders[1024] = {};
-            DWORD chReaders = x;
-            auto rc = SCardListReadersA(context, cur, mszReaders, &chReaders);
-            print_list_readers_a(rc, cur, mszReaders, chReaders);
+                print_list_readers_a(rc, cur, mszReaders, chReaders);
+                SCardFreeMemory(context, mszReaders);
+                for (DWORD x = 0; x < 256; x += 13) {
+                  CHAR mszReaders[1024] = {};
+                  DWORD chReaders = x;
+                  auto rc =
+                      SCardListReadersA(context, cur, mszReaders, &chReaders);
+                  print_list_readers_a(rc, cur, mszReaders, chReaders);
+                }
         }
-	}
 
 	return true;
 }
 
-static void print_list_readers_w(LONG rc, LPCWSTR cur, LPCWSTR mszReaders, DWORD chReaders) {
-    std::wstring c = cur? cur : L"nullptr";
-    if (rc != SCARD_S_SUCCESS)
-    {
-        std::wcerr << L"SCardListReadersW [" << c;
-        std::cerr << "] failed with " << err2str(rc) << std::endl;
-    }
-    else
-    {
-        auto start = mszReaders;
-        auto end = &mszReaders[chReaders];
+static void print_list_readers_w(LONG rc, LPCWSTR cur, LPCWSTR mszReaders,
+                                 DWORD chReaders) {
+  std::wstring c = cur ? cur : L"nullptr";
+  if (rc != SCARD_S_SUCCESS) {
+    std::wcerr << L"SCardListReadersW [" << c;
+    std::cerr << "] failed with " << err2str(rc) << std::endl;
+  } else {
+    auto start = mszReaders;
+    auto end = &mszReaders[chReaders];
 
-        std::wcout << L"SCardListReadersW [" << c << L"] " << chReaders << L" [";
-        while (start < end)
-        {
-            std::wcout << start << L", ";
-            start += wcsnlen(start, chReaders) + 2;
-        }
-        std::wcout << L"]" << std::endl;
+    std::wcout << L"SCardListReadersW [" << c << L"] " << chReaders << L" [";
+    while (start < end) {
+      std::wcout << start << L", ";
+      start += wcsnlen(start, chReaders) + 2;
     }
+    std::wcout << L"]" << std::endl;
+  }
 }
 
 static bool test_list_readers_w(SCARDCONTEXT context)
@@ -259,16 +254,17 @@ static bool test_list_readers_w(SCARDCONTEXT context)
 		DWORD chReaders = SCARD_AUTOALLOCATE;
 		auto rc =
 		    SCardListReadersW(context, cur, reinterpret_cast<LPWSTR>(&mszReaders), &chReaders);
-        print_list_readers_w(rc, cur, mszReaders, chReaders);
-		SCardFreeMemory(context, mszReaders);
-        for (DWORD x=0; x<246; x+=11) {
-            WCHAR mszReaders[1024] ={};
-            DWORD chReaders = x;
-            auto rc =
-                SCardListReadersW(context, cur, reinterpret_cast<LPWSTR>(&mszReaders), &chReaders);
-            print_list_readers_w(rc, cur, mszReaders, chReaders);
+                print_list_readers_w(rc, cur, mszReaders, chReaders);
+                SCardFreeMemory(context, mszReaders);
+                for (DWORD x = 0; x < 246; x += 11) {
+                  WCHAR mszReaders[1024] = {};
+                  DWORD chReaders = x;
+                  auto rc = SCardListReadersW(
+                      context, cur, reinterpret_cast<LPWSTR>(&mszReaders),
+                      &chReaders);
+                  print_list_readers_w(rc, cur, mszReaders, chReaders);
+                }
         }
-	}
 
 	return true;
 }
@@ -565,19 +561,18 @@ static bool test_reader_icon_a(SCARDCONTEXT context)
 		return false;
 	}
 
-    for (DWORD x=0; x<256; x++)
-    {
-        LPBYTE pbIcon = nullptr;
-        DWORD cbIcon = x;
-        auto rc = SCardGetReaderIconA(context, name, pbIcon, &cbIcon);
-        if (rc != SCARD_S_SUCCESS)
-        {
-            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc) << std::endl;
+        for (DWORD x = 0; x < 256; x++) {
+          LPBYTE pbIcon = nullptr;
+          DWORD cbIcon = x;
+          auto rc = SCardGetReaderIconA(context, name, pbIcon, &cbIcon);
+          if (rc != SCARD_S_SUCCESS) {
+            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc)
+                      << std::endl;
             return false;
+          }
         }
-    }
 
-	return true;
+        return true;
 }
 
 static bool test_reader_icon_w(SCARDCONTEXT context)
@@ -594,18 +589,17 @@ static bool test_reader_icon_w(SCARDCONTEXT context)
 		return false;
 	}
 
-    for (DWORD x=0; x<256; x++)
-    {
-        LPBYTE pbIcon = nullptr;
-        DWORD cbIcon = x;
-        auto rc = SCardGetReaderIconW(context, name, pbIcon, &cbIcon);
-        if (rc != SCARD_S_SUCCESS)
-        {
-            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc) << std::endl;
+        for (DWORD x = 0; x < 256; x++) {
+          LPBYTE pbIcon = nullptr;
+          DWORD cbIcon = x;
+          auto rc = SCardGetReaderIconW(context, name, pbIcon, &cbIcon);
+          if (rc != SCARD_S_SUCCESS) {
+            std::cerr << "SCardGetReaderIconW failed with " << err2str(rc)
+                      << std::endl;
             return false;
+          }
         }
-    }
-	return true;
+        return true;
 }
 
 static bool test_locate_cards_a(SCARDCONTEXT context)
@@ -643,7 +637,7 @@ static bool test_locate_cards_by_atr_a(SCARDCONTEXT context)
   SCARD_READERSTATEA rgReaderStates[6] = {};
   SCARD_ATRMASK rgAtrMasks[6] = {};
 
-  rgAtrMasks[3].cbAtr=11;
+  rgAtrMasks[3].cbAtr = 11;
   rgReaderStates[1].szReader = "foobar";
   auto rc = SCardLocateCardsByATRA(context, rgAtrMasks, ARRAYSIZE(rgAtrMasks),
                                    rgReaderStates, ARRAYSIZE(rgReaderStates));
@@ -661,7 +655,7 @@ static bool test_locate_cards_by_atr_w(SCARDCONTEXT context)
   SCARD_READERSTATEW rgReaderStates[6] = {};
   SCARD_ATRMASK rgAtrMasks[6] = {};
 
-  rgAtrMasks[3].cbAtr=11;
+  rgAtrMasks[3].cbAtr = 11;
   rgReaderStates[1].szReader = L"foobar";
   auto rc = SCardLocateCardsByATRW(context, rgAtrMasks, ARRAYSIZE(rgAtrMasks),
                                    rgReaderStates, ARRAYSIZE(rgReaderStates));
@@ -906,7 +900,6 @@ static bool test_status_w(SCARDCONTEXT context, SCARDHANDLE handle)
     return true;
 }
 
-
 static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 {
     for (auto id : {SCARD_ATTR_ATR_STRING, SCARD_ATTR_VENDOR_NAME, SCARD_ATTR_DEVICE_FRIENDLY_NAME_A, SCARD_ATTR_DEVICE_FRIENDLY_NAME_W}) {
@@ -921,20 +914,20 @@ static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
         std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
         SCardFreeMemory(context, attr);
 
-        for (DWORD x=0; x<256; x++) {
-            BYTE attr[1024] = {};
-            DWORD attrlen = x;
-            auto rc =
-                SCardGetAttrib(handle, id, attr, &attrlen);
-            if (rc != SCARD_S_SUCCESS)
-                std::cerr << "SCardGetAttrib failed with " << err2str(rc) << std::endl;
+        for (DWORD x = 0; x < 256; x++) {
+          BYTE attr[1024] = {};
+          DWORD attrlen = x;
+          auto rc = SCardGetAttrib(handle, id, attr, &attrlen);
+          if (rc != SCARD_S_SUCCESS)
+            std::cerr << "SCardGetAttrib failed with " << err2str(rc)
+                      << std::endl;
 
-            std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
+          std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char *)attr
+                    << std::endl;
         }
     }
     return true;
 }
-
 
 static bool test_set_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 {
@@ -946,9 +939,9 @@ static bool test_set_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
 		std::cerr << "SCardSetAttrib failed with " << err2str(rc) << std::endl;
 		return false;
 	}
-    std::cout << "SCardSetAttrib: " << (char*)attr << std::endl;
+        std::cout << "SCardSetAttrib: " << (char *)attr << std::endl;
 
-	return true;
+        return true;
 }
 
 static bool test_reconnect(SCARDHANDLE handle) {
