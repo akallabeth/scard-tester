@@ -905,11 +905,21 @@ static bool test_get_attrib(SCARDCONTEXT context, SCARDHANDLE handle)
     for (auto id : {SCARD_ATTR_ATR_STRING, SCARD_ATTR_VENDOR_NAME, SCARD_ATTR_DEVICE_FRIENDLY_NAME_A, SCARD_ATTR_DEVICE_FRIENDLY_NAME_W}) {
         DWORD attrlen = SCARD_AUTOALLOCATE;
         LPBYTE attr = nullptr;
+        BYTE buffer[1024] = {};
 
-        auto rc =
-            SCardGetAttrib(handle, id, reinterpret_cast<LPBYTE>(&attr), &attrlen);
+        auto rc = SCardGetAttrib(handle, id, nullptr, &attrlen);
         if (rc != SCARD_S_SUCCESS)
-            std::cerr << "SCardGetAttrib failed with " << err2str(rc) << std::endl;
+            std::cerr << "SCardGetAttrib nullptr failed with " << err2str(rc) << std::endl;
+
+        attrlen = sizeof(buffer);
+        rc = SCardGetAttrib(handle, id, buffer, &attrlen);
+        if (rc != SCARD_S_SUCCESS)
+            std::cerr << "SCardGetAttrib buffersize failed with " << err2str(rc) << std::endl;
+
+        attrlen = SCARD_AUTOALLOCATE;
+        rc = SCardGetAttrib(handle, id, reinterpret_cast<LPBYTE>(&attr), &attrlen);
+        if (rc != SCARD_S_SUCCESS)
+            std::cerr << "SCardGetAttrib SCARD_AUTOALLOCATE failed with " << err2str(rc) << std::endl;
 
         std::cout << "SCardGetAttrib [" << attrlen << "]: " << (char*)attr << std::endl;
         SCardFreeMemory(context, attr);
@@ -1141,7 +1151,7 @@ int main(int argc, char *argv[]) {
 
         {
           size_t offset = 0;
-          LPSTR mszReaders;
+          LPSTR mszReaders = nullptr;
           DWORD chReaders = SCARD_AUTOALLOCATE;
 
           LONG status = SCardListReadersA(context, nullptr,
@@ -1158,7 +1168,7 @@ int main(int argc, char *argv[]) {
         }
         {
           size_t offset;
-          LPWSTR mszReaders;
+          LPWSTR mszReaders = nullptr;
           DWORD chReaders = SCARD_AUTOALLOCATE;
 
           LONG status = SCardListReadersW(context, nullptr,
